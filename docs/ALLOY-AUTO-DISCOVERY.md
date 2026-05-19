@@ -1,4 +1,8 @@
-# Alloy Agent: Auto-Discovery and Metrics Scraping
+# Alloy Agent: Auto-Discovery and Metrics Scraping (DEPRECADO)
+
+> **NOTA:** Este documento describe el approach anterior basado en `update-targets.sh`.
+> Ha sido reemplazado por `discovery.docker` nativo de Alloy.
+> Ver [ALLOY-DOCKER-DISCOVERY.md](./ALLOY-DOCKER-DISCOVERY.md) para la solución actual.
 
 ## Problem
 
