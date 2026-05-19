@@ -1,0 +1,119 @@
+services:
+  loki:
+    image: grafana/loki:3.7.2
+    container_name: obs-loki
+    restart: unless-stopped
+    user: "0"
+    volumes:
+      - loki_data:/loki
+      - ./loki-config.yml:/etc/loki/config.yml:ro
+    ports:
+      - "0.0.0.0:3100:3100"
+    command: -config.file=/etc/loki/config.yml
+    healthcheck:
+      test: ["CMD", "/usr/bin/loki", "--version"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+
+  prometheus:
+    image: prom/prometheus:v3.4.1
+    container_name: obs-prometheus
+    restart: unless-stopped
+    user: "0"
+    volumes:
+      - prometheus_data:/prometheus
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "0.0.0.0:9090:9090"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=30d"
+      - "--storage.tsdb.retention.size=20GB"
+      - "--web.enable-lifecycle"
+      - "--web.enable-remote-write-receiver"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:9090/-/healthy || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  grafana:
+    image: grafana/grafana:13.0.1
+    container_name: obs-grafana
+    restart: unless-stopped
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    ports:
+      - "0.0.0.0:3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_ADMIN_PASSWORD}"
+      GF_SERVER_ROOT_URL: "${GRAFANA_ROOT_URL:-http://localhost:3000}"
+      GF_UNIFIED_ALERTING_ENABLED: "true"
+      GF_ALERTING_ENABLED: "false"
+      GF_LOG_MODE: "console"
+      GF_LOG_LEVEL: "warn"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  alloy:
+    image: grafana/alloy:v1.16.1
+    container_name: obs-alloy
+    restart: unless-stopped
+    volumes:
+      - ./alloy-local.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/log:/var/log:ro
+      - alloy_data:/var/lib/alloy
+    ports:
+      - "0.0.0.0:4317:4317"
+      - "0.0.0.0:4318:4318"
+    command: run /etc/alloy/config.alloy
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  bugsink:
+    image: bugsink/bugsink:2.1.3
+    container_name: obs-bugsink
+    restart: unless-stopped
+    volumes:
+      - bugsink_data:/data
+    ports:
+      - "0.0.0.0:8000:8000"
+    environment:
+      SECRET_KEY: "${BUGSINK_SECRET_KEY}"
+      PORT: "8000"
+      CREATE_SUPERUSER: "admin:${BUGSINK_ADMIN_PASSWORD}"
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+volumes:
+  loki_data:
+  prometheus_data:
+  grafana_data:
+  alloy_data:
+  bugsink_data:
+
+networks:
+  default:
+    name: observability

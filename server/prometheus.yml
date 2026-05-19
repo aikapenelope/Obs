@@ -1,0 +1,36 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  - job_name: "loki"
+    static_configs:
+      - targets: ["loki:3100"]
+
+  # === ADD YOUR TARGETS BELOW ===
+  # Uncomment and adjust for your infrastructure:
+
+  # - job_name: "postgres"
+  #   scrape_interval: 30s
+  #   static_configs:
+  #     - targets: ["<DATA_PLANE_IP>:9187"]
+  #       labels:
+  #         instance: "data-plane"
+
+  # - job_name: "redis"
+  #   scrape_interval: 30s
+  #   static_configs:
+  #     - targets: ["<DATA_PLANE_IP>:9121"]
+  #       labels:
+  #         instance: "data-plane"
+
+  # - job_name: "nova-api"
+  #   scrape_interval: 15s
+  #   static_configs:
+  #     - targets: ["<APP_PLANE_IP>:3001"]
+  #       labels:
+  #         project: "nova"
