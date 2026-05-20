@@ -67,7 +67,7 @@ discovery.relabel "docflow"           ← Filtra por coolify.resourceName = "doc
 prometheus.scrape "nova_api"          ← Scrapea /metrics en la IP descubierta
 prometheus.scrape "propi_api"         ← Scrapea /api/metrics
 prometheus.scrape "aurora_api"        ← Scrapea /api/metrics
-prometheus.scrape "docflow_api"       ← Scrapea /api/metrics/metrics
+prometheus.scrape "docflow_api"       ← Scrapea /api/metrics
        │
        ▼
 prometheus.remote_write "obs_plane"   ← Envía a Prometheus en 10.0.1.50:9090

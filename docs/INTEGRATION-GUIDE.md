@@ -685,7 +685,7 @@ Los DSN por proyecto están en el doc FULL-STATUS.md o se pueden obtener en la U
 | Nova API | `nova-api` | 3001 | `/metrics` | `nova-api` |
 | Propi | `propi-main` | 3000 | `/api/metrics` | `propi` |
 | Aurora | `aurora-main` | 3000 | `/api/metrics` | `aurora` |
-| Docflow API | `docflow-api` | 4000 | `/api/metrics/metrics` | `docflow` |
+| Docflow API | `docflow-api` | 4000 | `/api/metrics` | `docflow` |
 
 ### Dependencias npm
 

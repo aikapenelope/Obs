@@ -56,7 +56,7 @@ update_ip() {
 update_ip "w0o0k4owsw8s0csscocwwk0s" "3001"   # Nova API (Hono, /metrics)
 update_ip "wo8w0okogc4ko80owsos44sk" "3000"    # Propi (Next.js, /api/metrics)
 update_ip "tock4scgsws88k4okk4wo0so" "3000"    # Aurora (Nuxt, /api/metrics)
-update_ip "c4g8gckwwkggwgkogcsswsgg" "4000"    # DocFlow API (NestJS, /api/metrics/metrics)
+update_ip "c4g8gckwwkggwgkogcsswsgg" "4000"    # DocFlow API (NestJS, /api/metrics)
 
 # === RESTART IF CHANGED ===
 if [ "$CHANGED" = true ]; then
