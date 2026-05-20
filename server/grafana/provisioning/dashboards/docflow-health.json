@@ -1,0 +1,224 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "title": "Request Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{job=\"docflow\"}[5m])) by (method)",
+          "legendFormat": "{{method}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "custom": { "fillOpacity": 10, "lineWidth": 2 }
+        }
+      }
+    },
+    {
+      "title": "Error Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{job=\"docflow\", status=~\"5..\"}[5m]))",
+          "legendFormat": "5xx errors/s",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(app_errors_total{job=\"docflow\"}[5m])) by (error_type)",
+          "legendFormat": "{{error_type}}",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "custom": { "fillOpacity": 10, "lineWidth": 2 },
+          "color": { "mode": "palette-classic" }
+        }
+      }
+    },
+    {
+      "title": "Latency (p50 / p95 / p99)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket{job=\"docflow\"}[5m])) by (le))",
+          "legendFormat": "p50",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job=\"docflow\"}[5m])) by (le))",
+          "legendFormat": "p95",
+          "refId": "B"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job=\"docflow\"}[5m])) by (le))",
+          "legendFormat": "p99",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": { "fillOpacity": 5, "lineWidth": 2 }
+        }
+      }
+    },
+    {
+      "title": "Top Endpoints by Latency (p95)",
+      "type": "table",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "topk(10, histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job=\"docflow\"}[5m])) by (le, path)))",
+          "format": "table",
+          "instant": true,
+          "refId": "A"
+        }
+      ],
+      "transformations": [
+        { "id": "organize", "options": { "excludeByName": { "Time": true, "le": true }, "renameByName": { "Value": "p95 (s)", "path": "Endpoint" } } }
+      ]
+    },
+    {
+      "title": "Memory Usage",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "process_resident_memory_bytes{job=\"docflow\"}",
+          "legendFormat": "RSS",
+          "refId": "A"
+        },
+        {
+          "expr": "nodejs_heap_size_used_bytes{job=\"docflow\"}",
+          "legendFormat": "Heap Used",
+          "refId": "B"
+        },
+        {
+          "expr": "nodejs_heap_size_total_bytes{job=\"docflow\"}",
+          "legendFormat": "Heap Total",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "custom": { "fillOpacity": 10, "lineWidth": 2 }
+        }
+      }
+    },
+    {
+      "title": "Event Loop Lag",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "nodejs_eventloop_lag_seconds{job=\"docflow\", quantile=\"0.5\"}",
+          "legendFormat": "p50",
+          "refId": "A"
+        },
+        {
+          "expr": "nodejs_eventloop_lag_seconds{job=\"docflow\", quantile=\"0.99\"}",
+          "legendFormat": "p99",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": { "fillOpacity": 10, "lineWidth": 2 }
+        }
+      }
+    },
+    {
+      "title": "Requests by Status Code",
+      "type": "piechart",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 24 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(increase(http_requests_total{job=\"docflow\"}[24h])) by (status)",
+          "legendFormat": "{{status}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Requests by Endpoint (top 10)",
+      "type": "bargauge",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 24 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "topk(10, sum(increase(http_requests_total{job=\"docflow\"}[24h])) by (path))",
+          "legendFormat": "{{path}}",
+          "refId": "A"
+        }
+      ],
+      "options": { "orientation": "horizontal", "displayMode": "gradient" }
+    },
+    {
+      "title": "Active Handles & Connections",
+      "type": "stat",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 24 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "nodejs_active_handles_total{job=\"docflow\"}",
+          "legendFormat": "Active Handles",
+          "refId": "A"
+        },
+        {
+          "expr": "nodejs_active_requests_total{job=\"docflow\"}",
+          "legendFormat": "Active Requests",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "title": "Recent Logs",
+      "type": "logs",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 32 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        {
+          "expr": "{service_name=~\".*docflow.*\"} | json",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "showTime": true,
+        "sortOrder": "Descending",
+        "enableLogDetails": true
+      }
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["docflow", "per-project"],
+  "templating": { "list": [] },
+  "time": { "from": "now-6h", "to": "now" },
+  "timepicker": {},
+  "timezone": "America/Caracas",
+  "title": "Docflow — Per-Project Health",
+  "uid": "docflow-health",
+  "version": 1
+}
